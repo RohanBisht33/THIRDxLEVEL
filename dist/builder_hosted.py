@@ -114,7 +114,7 @@ class Item:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> Item:
+    def from_dict(cls, data: Dict[str, Any]) -> "Item":
         return cls(
             name=str(data.get("name", "")),
             price=float(data.get("price", 0.0)),
@@ -181,7 +181,7 @@ class Business:
                 return item
         return None
 
-    def add_item(self, item: Item) -> Business:
+    def add_item(self, item: Item) -> "Business":
         """Add an item and return a NEW versioned Business instance."""
         item.validate()
         new_items = copy.deepcopy(self.items)
@@ -204,7 +204,7 @@ class Business:
             items=new_items,
         )
 
-    def remove_item(self, item_name: str) -> Business:
+    def remove_item(self, item_name: str) -> "Business":
         """Remove an item and return a NEW versioned Business instance."""
         target = item_name.strip().lower()
         new_items = [i for i in self.items if i.name.strip().lower() != target]
@@ -219,7 +219,7 @@ class Business:
             items=new_items,
         )
 
-    def update_item_stock(self, item_name: str, new_stock: Optional[int]) -> Business:
+    def update_item_stock(self, item_name: str, new_stock: Optional[int]) -> "Business":
         """Update stock for an item and return a NEW versioned Business instance."""
         item = self.get_item(item_name)
         if not item:
@@ -242,7 +242,7 @@ class Business:
         return json.dumps(self.to_dict(), indent=indent)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> Business:
+    def from_dict(cls, data: Dict[str, Any]) -> "Business":
         raw_items = data.get("items", [])
         items = [Item.from_dict(i) if isinstance(i, dict) else i for i in raw_items]
         raw_name = str(data.get("name") or "My Shop").strip()
@@ -259,7 +259,7 @@ class Business:
         )
 
     @classmethod
-    def from_json(cls, json_str: str) -> Business:
+    def from_json(cls, json_str: str) -> "Business":
         data = json.loads(json_str)
         return cls.from_dict(data)
 
@@ -347,7 +347,7 @@ class CartItem:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> CartItem:
+    def from_dict(cls, data: Dict[str, Any]) -> "CartItem":
         return cls(
             item_name=str(data["item_name"]),
             unit_price=float(data["unit_price"]),
@@ -461,7 +461,7 @@ class Order:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> Order:
+    def from_dict(cls, data: Dict[str, Any]) -> "Order":
         items = [CartItem.from_dict(i) if isinstance(i, dict) else i for i in data.get("items", [])]
         return cls(
             order_id=str(data["order_id"]),
@@ -754,7 +754,7 @@ class QACase:
     description: str
     input_message: str
     expected_concept: str
-    validator: Optional[Callable[[str, Dict[str, Any]], tuple[bool, str]]] = None
+    validator: Optional[Callable[[str, Dict[str, Any]], Tuple[bool, str]]] = None
 
 
 @dataclass

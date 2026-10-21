@@ -22,7 +22,7 @@ class QACase:
     description: str
     input_message: str
     expected_concept: str
-    validator: Optional[Callable[[str, Dict[str, Any]], tuple[bool, str]]] = None
+    validator: Optional[Callable[[str, Dict[str, Any]], Tuple[bool, str]]] = None
 
 
 @dataclass

@@ -82,7 +82,7 @@ class CartItem:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> CartItem:
+    def from_dict(cls, data: Dict[str, Any]) -> "CartItem":
         return cls(
             item_name=str(data["item_name"]),
             unit_price=float(data["unit_price"]),
@@ -196,7 +196,7 @@ class Order:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> Order:
+    def from_dict(cls, data: Dict[str, Any]) -> "Order":
         items = [CartItem.from_dict(i) if isinstance(i, dict) else i for i in data.get("items", [])]
         return cls(
             order_id=str(data["order_id"]),
