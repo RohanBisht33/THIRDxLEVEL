@@ -1,9 +1,15 @@
-from __future__ import annotations
 """
 AgentForge: Storefront Hub Agent (Agentverse Hosted Agent Bundle)
 Generated automatically by scripts/bundle_for_agentverse.py
-Single-file self-contained bundle with zero multi-file imports.
+Single-file self-contained bundle for Agentverse hosted cloud runtime.
 """
+
+import sys
+import types
+
+# Ensure module is registered in sys.modules for Agentverse dynamic runner
+if __name__ not in sys.modules:
+    sys.modules[__name__] = types.ModuleType(__name__)
 
 
 # ==================== MODULE: core/catalog.py ====================
@@ -1701,7 +1707,7 @@ class StorefrontLogic:
 def create_storefront_agent(
     name: str = "storefront_hub",
     seed: Optional[str] = None,
-    port: int = 8003,
+    port: Optional[int] = 8003,
     store: Optional[StoreBackend] = None,
 ) -> Agent:
     """Instantiate and configure the Storefront Hub Agent."""
@@ -1713,7 +1719,12 @@ def create_storefront_agent(
         asyncio.set_event_loop(loop)
 
     seed_phrase = seed or os.getenv("STOREFRONT_AGENT_SEED", "agentforge_storefront_seed_demo_2026")
-    agent = Agent(name=name, seed=seed_phrase, port=port, endpoint=[f"http://127.0.0.1:{port}/submit"], loop=loop)
+    kwargs = {"name": name, "seed": seed_phrase, "loop": loop}
+    if port is not None:
+        kwargs["port"] = port
+        kwargs["endpoint"] = [f"http://127.0.0.1:{port}/submit"]
+
+    agent = Agent(**kwargs)
 
     storage_backend = store or MemoryStore()
     logic = StorefrontLogic(storage_backend)
@@ -1758,5 +1769,5 @@ def create_storefront_agent(
 # Agentverse executes the module and manages the event loop lifecycle natively.
 # Notice: No agent.run() is called.
 
-storefront_agent = create_storefront_agent()
+storefront_agent = create_storefront_agent(port=None)
 agent = storefront_agent

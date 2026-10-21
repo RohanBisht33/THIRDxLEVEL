@@ -299,7 +299,7 @@ def extract_catalog(
 def create_extractor_agent(
     name: str = "extractor_agent",
     seed: Optional[str] = None,
-    port: int = 8002,
+    port: Optional[int] = 8002,
 ) -> Agent:
     """Instantiate the Extractor Agent."""
     import asyncio
@@ -310,7 +310,12 @@ def create_extractor_agent(
         asyncio.set_event_loop(loop)
 
     seed_phrase = seed or os.getenv("EXTRACTOR_AGENT_SEED", "agentforge_extractor_seed_demo_2026")
-    agent = Agent(name=name, seed=seed_phrase, port=port, endpoint=[f"http://127.0.0.1:{port}/submit"], loop=loop)
+    kwargs = {"name": name, "seed": seed_phrase, "loop": loop}
+    if port is not None:
+        kwargs["port"] = port
+        kwargs["endpoint"] = [f"http://127.0.0.1:{port}/submit"]
+
+    agent = Agent(**kwargs)
 
     # 1. Custom inter-agent protocol for Builder requests
     extractor_proto = Protocol(name="CatalogExtractorProtocol", version="0.1.0")

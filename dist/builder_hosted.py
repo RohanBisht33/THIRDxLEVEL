@@ -1,9 +1,15 @@
-from __future__ import annotations
 """
 AgentForge: Builder Orchestrator Agent (Agentverse Hosted Agent Bundle)
 Generated automatically by scripts/bundle_for_agentverse.py
-Single-file self-contained bundle with zero multi-file imports.
+Single-file self-contained bundle for Agentverse hosted cloud runtime.
 """
+
+import sys
+import types
+
+# Ensure module is registered in sys.modules for Agentverse dynamic runner
+if __name__ not in sys.modules:
+    sys.modules[__name__] = types.ModuleType(__name__)
 
 
 # ==================== MODULE: core/catalog.py ====================
@@ -1710,7 +1716,7 @@ class BuilderLogic:
 def create_builder_agent(
     name: str = "builder_agent",
     seed: Optional[str] = None,
-    port: int = 8001,
+    port: Optional[int] = 8001,
     store: Optional[StoreBackend] = None,
     storefront_address: Optional[str] = None,
 ) -> Agent:
@@ -1723,7 +1729,12 @@ def create_builder_agent(
         asyncio.set_event_loop(loop)
 
     seed_phrase = seed or os.getenv("BUILDER_AGENT_SEED", "agentforge_builder_seed_demo_2026")
-    agent = Agent(name=name, seed=seed_phrase, port=port, endpoint=[f"http://127.0.0.1:{port}/submit"], loop=loop)
+    kwargs = {"name": name, "seed": seed_phrase, "loop": loop}
+    if port is not None:
+        kwargs["port"] = port
+        kwargs["endpoint"] = [f"http://127.0.0.1:{port}/submit"]
+
+    agent = Agent(**kwargs)
 
     storage_backend = store or MemoryStore()
     builder_logic = BuilderLogic(storage_backend, storefront_address)
@@ -1761,5 +1772,5 @@ def create_builder_agent(
 # Agentverse executes the module and manages the event loop lifecycle natively.
 # Notice: No agent.run() is called.
 
-builder_agent = create_builder_agent()
+builder_agent = create_builder_agent(port=None)
 agent = builder_agent

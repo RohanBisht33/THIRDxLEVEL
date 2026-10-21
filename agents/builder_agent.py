@@ -293,7 +293,7 @@ class BuilderLogic:
 def create_builder_agent(
     name: str = "builder_agent",
     seed: Optional[str] = None,
-    port: int = 8001,
+    port: Optional[int] = 8001,
     store: Optional[StoreBackend] = None,
     storefront_address: Optional[str] = None,
 ) -> Agent:
@@ -306,7 +306,12 @@ def create_builder_agent(
         asyncio.set_event_loop(loop)
 
     seed_phrase = seed or os.getenv("BUILDER_AGENT_SEED", "agentforge_builder_seed_demo_2026")
-    agent = Agent(name=name, seed=seed_phrase, port=port, endpoint=[f"http://127.0.0.1:{port}/submit"], loop=loop)
+    kwargs = {"name": name, "seed": seed_phrase, "loop": loop}
+    if port is not None:
+        kwargs["port"] = port
+        kwargs["endpoint"] = [f"http://127.0.0.1:{port}/submit"]
+
+    agent = Agent(**kwargs)
 
     storage_backend = store or MemoryStore()
     builder_logic = BuilderLogic(storage_backend, storefront_address)

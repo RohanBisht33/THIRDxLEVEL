@@ -72,12 +72,18 @@ def build_bundle(agent_name: str, agent_file: str, output_file: str) -> None:
     """Combine core modules and agent logic into single standalone hosted agent file."""
     print(f"Bundling {agent_name} -> {output_file}...")
 
-    header = f'''from __future__ import annotations
-"""
+    header = f'''"""
 AgentForge: {agent_name} (Agentverse Hosted Agent Bundle)
 Generated automatically by scripts/bundle_for_agentverse.py
-Single-file self-contained bundle with zero multi-file imports.
+Single-file self-contained bundle for Agentverse hosted cloud runtime.
 """
+
+import sys
+import types
+
+# Ensure module is registered in sys.modules for Agentverse dynamic runner
+if __name__ not in sys.modules:
+    sys.modules[__name__] = types.ModuleType(__name__)
 '''
     # 1. Collect and clean core modules
     core_parts = []
@@ -105,11 +111,11 @@ Single-file self-contained bundle with zero multi-file imports.
 # Notice: No agent.run() is called.
 """
     if "storefront" in agent_name.lower():
-        global_init_block += "\nstorefront_agent = create_storefront_agent()\nagent = storefront_agent\n"
+        global_init_block += "\nstorefront_agent = create_storefront_agent(port=None)\nagent = storefront_agent\n"
     elif "builder" in agent_name.lower():
-        global_init_block += "\nbuilder_agent = create_builder_agent()\nagent = builder_agent\n"
+        global_init_block += "\nbuilder_agent = create_builder_agent(port=None)\nagent = builder_agent\n"
     elif "extractor" in agent_name.lower():
-        global_init_block += "\nextractor_agent = create_extractor_agent()\nagent = extractor_agent\n"
+        global_init_block += "\nextractor_agent = create_extractor_agent(port=None)\nagent = extractor_agent\n"
 
     full_bundle = (
         header

@@ -282,7 +282,7 @@ class StorefrontLogic:
 def create_storefront_agent(
     name: str = "storefront_hub",
     seed: Optional[str] = None,
-    port: int = 8003,
+    port: Optional[int] = 8003,
     store: Optional[StoreBackend] = None,
 ) -> Agent:
     """Instantiate and configure the Storefront Hub Agent."""
@@ -294,7 +294,12 @@ def create_storefront_agent(
         asyncio.set_event_loop(loop)
 
     seed_phrase = seed or os.getenv("STOREFRONT_AGENT_SEED", "agentforge_storefront_seed_demo_2026")
-    agent = Agent(name=name, seed=seed_phrase, port=port, endpoint=[f"http://127.0.0.1:{port}/submit"], loop=loop)
+    kwargs = {"name": name, "seed": seed_phrase, "loop": loop}
+    if port is not None:
+        kwargs["port"] = port
+        kwargs["endpoint"] = [f"http://127.0.0.1:{port}/submit"]
+
+    agent = Agent(**kwargs)
 
     storage_backend = store or MemoryStore()
     logic = StorefrontLogic(storage_backend)
